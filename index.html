@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dental Platino — Sistema de Gestión</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+:root {
+  --bg-primary:#ffffff;--bg-secondary:#f5f5f0;--bg-tertiary:#eeede8;
+  --text-primary:#1a1a1a;--text-secondary:#6b6b6b;
+  --border-light:rgba(0,0,0,0.1);--border-med:rgba(0,0,0,0.18);
+  --teal:#0F6E56;--teal-light:#E1F5EE;--teal-mid:#9FE1CB;--teal-dark:#085041;
+  --amber-light:#FAEEDA;--amber-mid:#FAC775;--amber-dark:#633806;
+  --blue-light:#E6F1FB;--blue-mid:#B5D4F4;--blue-dark:#0C447C;
+  --red-light:#FCEBEB;--red-mid:#F7C1C1;--red-dark:#791F1F;
+  --green-light:#EAF3DE;--green-dark:#27500A;
+  --purple-light:#EEEDFE;--purple-mid:#CECBF6;--purple-dark:#3C3489;
+  --wa:#25D366;--wa-dark:#1da851;
+  --radius:8px;--radius-lg:12px;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg-primary:#1e1e1e;--bg-secondary:#252525;--bg-tertiary:#161616;
+    --text-primary:#f0f0f0;--text-secondary:#a0a0a0;
+    --border-light:rgba(255,255,255,0.08);--border-med:rgba(255,255,255,0.15);
+    --teal:#1D9E75;--teal-light:#0a2e22;--teal-mid:#0F6E56;--teal-dark:#9FE1CB;
+    --amber-light:#2a2010;--amber-dark:#FAC775;
+    --blue-light:#0a1e30;--blue-dark:#85B7EB;
+    --red-light:#2a0a0a;--red-dark:#F09595;
+    --green-light:#0f2008;--green-dark:#C0DD97;
+    --purple-light:#1a1840;--purple-dark:#AFA9EC;
+  }
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg-tertiary);color:var(--text-primary);font-size:14px}
+.app{display:flex;height:100vh;overflow:hidden}
+.sidebar{width:200px;background:var(--bg-primary);border-right:1px solid var(--border-light);display:flex;flex-direction:column;padding:1rem 0;flex-shrink:0}
+.logo{padding:0 1rem 1rem;border-bottom:1px solid var(--border-light);margin-bottom:0.5rem}
+.logo-title{font-size:15px;font-weight:600;color:var(--text-primary)}
+.logo-sub{font-size:11px;color:var(--text-secondary)}
+.nav-item{display:flex;align-items:center;gap:8px;padding:9px 1rem;cursor:pointer;font-size:13px;color:var(--text-secondary);border-left:2px solid transparent;transition:all 0.12s}
+.nav-item:hover{background:var(--bg-secondary);color:var(--text-primary)}
+.nav-item.active{color:var(--teal);background:var(--teal-light);border-left-color:var(--teal);font-weight:500}
+.nav-item i{font-size:16px}
+.main{flex:1;overflow:hidden;display:flex;flex-direction:column;min-width:0}
+.topbar{background:var(--bg-primary);border-bottom:1px solid var(--border-light);padding:0.75rem 1.25rem;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.topbar-title{font-size:16px;font-weight:600}
+.topbar-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.btn{padding:6px 12px;border-radius:var(--radius);border:1px solid var(--border-med);background:var(--bg-primary);font-size:13px;cursor:pointer;color:var(--text-primary);display:inline-flex;align-items:center;gap:5px;font-family:inherit;transition:background 0.1s}
+.btn:hover{background:var(--bg-secondary)}
+.btn:disabled{opacity:0.5;cursor:not-allowed}
+.btn-primary{background:var(--teal);color:#fff;border-color:var(--teal)}
+.btn-primary:hover{background:var(--teal-dark)}
+.btn-green{background:var(--wa);color:#fff;border-color:var(--wa)}
+.btn-green:hover{background:var(--wa-dark)}
+.btn-danger{background:#A32D2D;color:#fff;border-color:#A32D2D}
+.btn-sm{padding:4px 9px;font-size:12px}
+.content{flex:1;overflow-y:auto;padding:1.25rem}
+.page{display:none}.page.active{display:block}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:0.75rem}
+.card{background:var(--bg-primary);border:1px solid var(--border-light);border-radius:var(--radius-lg);padding:1rem 1.25rem}
+.metric{background:var(--bg-secondary);border-radius:var(--radius);padding:1rem;text-align:center}
+.metric-val{font-size:24px;font-weight:700}
+.metric-lbl{font-size:11px;color:var(--text-secondary);margin-top:2px}
+.sec{font-size:13px;font-weight:600;margin-bottom:0.75rem}
+.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:500}
+.bg{background:var(--green-light);color:var(--green-dark)}
+.ba{background:var(--amber-light);color:var(--amber-dark)}
+.bb{background:var(--blue-light);color:var(--blue-dark)}
+.br{background:var(--red-light);color:var(--red-dark)}
+.bgr{background:var(--bg-secondary);color:var(--text-secondary)}
+table{width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed}
+th{text-align:left;padding:7px 10px;font-size:10px;font-weight:600;color:var(--text-secondary);border-bottom:1px solid var(--border-light);text-transform:uppercase;letter-spacing:0.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+td{padding:8px 10px;border-bottom:1px solid var(--border-light);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--bg-secondary)}
+.av{width:26px;height:26px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;margin-right:5px;vertical-align:middle;flex-shrink:0}
+.at{background:var(--teal-mid);color:var(--teal-dark)}
+.ab{background:var(--blue-mid);color:var(--blue-dark)}
+.ap{background:var(--purple-mid);color:var(--purple-dark)}
+.ac{background:#F5C4B3;color:#712B13}
+.divider{height:1px;background:var(--border-light);margin:0.75rem 0}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.fg{display:flex;flex-direction:column;gap:3px}
+label{font-size:11px;font-weight:600;color:var(--text-secondary)}
+input,select,textarea{font-size:13px;padding:7px 10px;border-radius:var(--radius);border:1px solid var(--border-med);background:var(--bg-primary);color:var(--text-primary);width:100%;font-family:inherit}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--teal);box-shadow:0 0 0 2px rgba(15,110,86,0.15)}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:200;align-items:center;justify-content:center}
+.overlay.open{display:flex}
+.modal{background:var(--bg-primary);border-radius:var(--radius-lg);padding:1.25rem;width:480px;max-width:96vw;max-height:88vh;overflow-y:auto;border:1px solid var(--border-light)}
+.mh{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;padding-bottom:0.75rem;border-bottom:1px solid var(--border-light)}
+.mt2{font-size:14px;font-weight:600}
+.xb{background:none;border:none;cursor:pointer;color:var(--text-secondary);font-size:17px;padding:3px}
+.xb:hover{color:var(--text-primary)}
+.wa-preview{background:var(--teal-light);border-radius:var(--radius);padding:0.75rem 1rem;font-size:12px;color:var(--teal-dark);margin-top:8px;line-height:1.6;white-space:pre-line}
+.prog-bar{height:5px;background:var(--border-light);border-radius:3px;overflow:hidden;margin-top:3px}
+.prog-fill{height:100%;border-radius:3px;background:var(--teal)}
+.pay-chip{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:999px;font-size:12px;border:1px solid var(--border-med);cursor:pointer;color:var(--text-secondary);background:var(--bg-primary)}
+.pay-chip.sel{background:var(--teal-light);color:var(--teal-dark);border-color:var(--teal)}
+.wa-chip{background:var(--teal-light);color:var(--teal-dark);border:1px solid var(--teal-mid);border-radius:999px;padding:2px 8px;font-size:11px;display:inline-flex;align-items:center;gap:3px}
+.sync-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:4px}
+.sync-ok{background:#25D366}.sync-err{background:#E24B4A}.sync-loading{background:#FAC775;animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+.toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--bg-primary);border:1px solid var(--border-light);border-radius:var(--radius-lg);padding:0.75rem 1rem;font-size:13px;z-index:999;display:flex;align-items:center;gap:8px;box-shadow:0 4px 16px rgba(0,0,0,0.12);transform:translateY(100px);opacity:0;transition:all 0.25s}
+.toast.show{transform:translateY(0);opacity:1}
+.setup-banner{background:var(--blue-light);border:1px solid var(--blue-mid);border-radius:var(--radius-lg);padding:1rem 1.25rem;margin-bottom:1rem;font-size:13px;color:var(--blue-dark)}
+.setup-banner strong{display:block;margin-bottom:4px;font-size:14px}
+.step-num{display:inline-flex;width:22px;height:22px;border-radius:50%;background:var(--teal);color:#fff;font-size:11px;font-weight:700;align-items:center;justify-content:center;margin-right:6px;flex-shrink:0}
+.step-row{display:flex;align-items:flex-start;margin-bottom:8px;font-size:12px;line-height:1.5}
+code{background:var(--bg-secondary);padding:1px 5px;border-radius:4px;font-size:11px;font-family:monospace}
+@media(max-width:700px){
+  .sidebar{width:52px}.sidebar .logo-title,.sidebar .logo-sub,.sidebar .nav-item span{display:none}
+  .g2{grid-template-columns:1fr}.g4{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<div class="toast" id="toast"></div>
+
+<div class="app">
+<div class="sidebar">
+  <div class="logo">
+    <div style="display:flex;align-items:center;gap:7px;margin-bottom:3px">
+      <i class="ti ti-tooth" style="font-size:19px;color:var(--teal)"></i>
+      <div><div class="logo-title">Dental Platino</div><div class="logo-sub">Sistema de gestión</div></div>
+    </div>
+  </div>
+  <div class="nav-item active" onclick="sp('dashboard',this)"><i class="ti ti-layout-dashboard"></i><span>Inicio</span></div>
+  <div class="nav-item" onclick="sp('agenda',this)"><i class="ti ti-calendar"></i><span>Agenda</span></div>
+  <div class="nav-item" onclick="sp('pacientes',this)"><i class="ti ti-users"></i><span>Pacientes</span></div>
+  <div class="nav-item" onclick="sp('confirmaciones',this)"><i class="ti ti-brand-whatsapp"></i><span>Confirmaciones</span></div>
+  <div class="nav-item" onclick="sp('pagos',this)"><i class="ti ti-credit-card"></i><span>Pagos</span></div>
+  <div class="nav-item" onclick="sp('expediente',this)"><i class="ti ti-file-medical"></i><span>Expedientes</span></div>
+  <div style="flex:1"></div>
+  <div class="nav-item" onclick="sp('config',this)"><i class="ti ti-settings"></i><span>Configuración</span></div>
+</div>
+
+<div class="main">
+<div class="topbar">
+  <div class="topbar-title" id="ptitle">Panel principal</div>
+  <div class="topbar-right">
+    <span id="fecha-hoy" style="font-size:11px;color:var(--text-secondary)"></span>
+    <span id="sync-status" style="font-size:11px;display:flex;align-items:center">
+      <span class="sync-dot sync-loading" id="sync-dot"></span>
+      <span id="sync-txt" style="color:var(--text-secondary)">Conectando…</span>
+    </span>
+    <button class="btn btn-sm" onclick="syncNow()" id="btn-sync" title="Sincronizar ahora"><i class="ti ti-refresh"></i></button>
+    <button class="btn btn-primary btn-sm" onclick="om('mcita')"><i class="ti ti-plus"></i>Nueva cita</button>
+  </div>
+</div>
+<div class="content">
+
+<!-- DASHBOARD -->
+<div class="page active" id="page-dashboard">
+  <div id="setup-notice"></div>
+  <div class="g4" style="margin-bottom:1rem">
+    <div class="metric"><div class="metric-val" id="d-citas">—</div><div class="metric-lbl">Citas hoy</div></div>
+    <div class="metric"><div class="metric-val" id="d-pend">—</div><div class="metric-lbl">Sin confirmar</div></div>
+    <div class="metric"><div class="metric-val" id="d-ing">—</div><div class="metric-lbl">Ingresos hoy</div></div>
+    <div class="metric"><div class="metric-val" id="d-mes">—</div><div class="metric-lbl">Ingresos del mes</div></div>
+  </div>
+  <div class="g2">
+    <div class="card">
+      <div class="sec"><i class="ti ti-clock" style="font-size:13px;vertical-align:-1px;margin-right:4px"></i>Citas de hoy</div>
+      <table><thead><tr><th style="width:30%">Paciente</th><th style="width:14%">Hora</th><th style="width:22%">Tratamiento</th><th style="width:20%">Doctor</th><th style="width:14%">Estado</th></tr></thead>
+      <tbody id="t-today"></tbody></table>
+    </div>
+    <div class="card">
+      <div class="sec"><i class="ti ti-brand-whatsapp" style="font-size:13px;vertical-align:-1px;margin-right:4px;color:var(--wa)"></i>Pendientes WhatsApp</div>
+      <div id="d-pending"></div>
+      <div class="divider"></div>
+      <div class="sec"><i class="ti ti-receipt" style="font-size:13px;vertical-align:-1px;margin-right:4px"></i>Pagos recientes</div>
+      <div id="d-recent-pay"></div>
+    </div>
+  </div>
+</div>
+
+<!-- AGENDA -->
+<div class="page" id="page-agenda">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:8px">
+    <div style="display:flex;align-items:center;gap:8px">
+      <button class="btn btn-sm" onclick="cm(-1)"><i class="ti ti-chevron-left"></i></button>
+      <span style="font-size:14px;font-weight:600;min-width:130px;text-align:center" id="cal-lbl"></span>
+      <button class="btn btn-sm" onclick="cm(1)"><i class="ti ti-chevron-right"></i></button>
+    </div>
+    <div style="display:flex;gap:10px;font-size:11px;align-items:center">
+      <span style="display:flex;align-items:center;gap:3px"><span style="width:9px;height:9px;border-radius:2px;background:var(--teal-mid);display:inline-block"></span>Confirmada</span>
+      <span style="display:flex;align-items:center;gap:3px"><span style="width:9px;height:9px;border-radius:2px;background:var(--amber-mid);display:inline-block"></span>Pendiente</span>
+      <span style="display:flex;align-items:center;gap:3px"><span style="width:9px;height:9px;border-radius:2px;background:var(--blue-mid);display:inline-block"></span>1a. vez</span>
+    </div>
+  </div>
+  <div class="card">
+    <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px" id="cal-h"></div>
+    <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-top:4px" id="cal-b"></div>
+  </div>
+</div>
+
+<!-- PACIENTES -->
+<div class="page" id="page-pacientes">
+  <div style="display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap">
+    <input type="text" id="srch" placeholder="Buscar paciente…" style="max-width:260px" oninput="rPats()">
+    <button class="btn btn-primary btn-sm" onclick="om('mpac')"><i class="ti ti-user-plus"></i>Nuevo paciente</button>
+  </div>
+  <div class="card">
+    <table><thead><tr><th style="width:32%">Paciente</th><th style="width:22%">Teléfono</th><th style="width:18%">Última visita</th><th style="width:16%">Saldo</th><th style="width:12%"></th></tr></thead>
+    <tbody id="t-pats"></tbody></table>
+  </div>
+</div>
+
+<!-- CONFIRMACIONES -->
+<div class="page" id="page-confirmaciones">
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:0.75rem">
+    <i class="ti ti-brand-whatsapp" style="font-size:22px;color:var(--wa)"></i>
+    <div><div style="font-size:14px;font-weight:600">Confirmaciones vía WhatsApp</div>
+    <div style="font-size:11px;color:var(--text-secondary)">Genera mensajes listos para enviar desde tu celular</div></div>
+  </div>
+  <div style="margin-bottom:1rem"><div style="font-size:12px;color:var(--text-secondary);margin-bottom:8px">Citas próximas sin confirmar</div><div id="wa-list"></div></div>
+  <div class="card">
+    <div class="sec">Historial de confirmaciones</div>
+    <table><thead><tr><th style="width:28%">Paciente</th><th style="width:22%">Fecha cita</th><th style="width:26%">Confirmado</th><th style="width:14%">Método</th><th style="width:10%">Estado</th></tr></thead>
+    <tbody id="t-confhist"></tbody></table>
+  </div>
+</div>
+
+<!-- PAGOS -->
+<div class="page" id="page-pagos">
+  <div style="display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap;align-items:center">
+    <input type="text" id="srch-pay" placeholder="Buscar por paciente…" style="max-width:220px" oninput="rPagos()">
+    <select id="fil-pay" onchange="rPagos()" style="width:auto;font-size:12px">
+      <option value="">Todos</option><option value="pagado">Pagado</option>
+      <option value="parcial">Parcial</option><option value="pendiente">Pendiente</option>
+    </select>
+    <button class="btn btn-primary btn-sm" onclick="om('mpago')"><i class="ti ti-receipt"></i>Registrar pago</button>
+  </div>
+  <div class="g4" style="margin-bottom:1rem">
+    <div class="metric"><div class="metric-val" id="pay-total">$0</div><div class="metric-lbl">Total cobrado</div></div>
+    <div class="metric"><div class="metric-val" id="pay-pend">$0</div><div class="metric-lbl">Por cobrar</div></div>
+    <div class="metric"><div class="metric-val" id="pay-efe">$0</div><div class="metric-lbl">Efectivo</div></div>
+    <div class="metric"><div class="metric-val" id="pay-tar">$0</div><div class="metric-lbl">Tarjeta/Transfer.</div></div>
+  </div>
+  <div class="card">
+    <table><thead><tr><th style="width:24%">Paciente</th><th style="width:16%">Fecha</th><th style="width:20%">Tratamiento</th><th style="width:13%">Total</th><th style="width:16%">Pagado</th><th style="width:11%">Estado</th></tr></thead>
+    <tbody id="t-pagos"></tbody></table>
+  </div>
+</div>
+
+<!-- EXPEDIENTES -->
+<div class="page" id="page-expediente">
+  <div style="display:flex;gap:8px;margin-bottom:1rem">
+    <input type="text" id="srch-exp" placeholder="Buscar expediente…" style="max-width:260px" oninput="rExp()">
+  </div>
+  <div class="g2">
+    <div class="card"><div class="sec">Pacientes</div><div id="exp-list" style="display:flex;flex-direction:column;gap:5px"></div></div>
+    <div class="card" id="exp-det">
+      <div style="color:var(--text-secondary);font-size:13px;text-align:center;padding:2rem 0">
+        <i class="ti ti-file-medical" style="font-size:30px;display:block;margin-bottom:6px;opacity:0.3"></i>Selecciona un paciente
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIG -->
+<div class="page" id="page-config">
+  <div class="card" style="margin-bottom:1rem;border:2px solid var(--teal);background:var(--teal-light)">
+    <div class="sec" style="color:var(--teal-dark)"><i class="ti ti-brand-google" style="font-size:14px;vertical-align:-2px;margin-right:5px"></i>Conexión con Google Sheets</div>
+    <div style="font-size:12px;color:var(--teal-dark);margin-bottom:10px">Ingresa la URL de tu Google Apps Script para sincronizar todos los datos en la nube.</div>
+    <div style="display:flex;gap:8px;align-items:flex-end">
+      <div class="fg" style="flex:1"><label>URL del Web App (Apps Script)</label>
+        <input type="text" id="cfg-url" placeholder="https://script.google.com/macros/s/…/exec" oninput="checkUrl()">
+      </div>
+      <button class="btn btn-primary" onclick="saveUrl()" id="btn-save-url"><i class="ti ti-check"></i>Guardar y conectar</button>
+    </div>
+    <div id="url-status" style="margin-top:8px;font-size:12px"></div>
+    <div class="divider" style="margin:0.75rem 0"></div>
+    <div style="font-size:12px;font-weight:600;color:var(--teal-dark);margin-bottom:8px">Guía de configuración — 3 pasos</div>
+    <div class="step-row"><span class="step-num">1</span><div>Ve a <a href="https://sheets.google.com" target="_blank" style="color:var(--teal)">sheets.google.com</a>, crea una hoja de cálculo nueva y nómbrala <code>Dental Platino DB</code>.</div></div>
+    <div class="step-row"><span class="step-num">2</span><div>En esa hoja, ve al menú <strong>Extensiones → Apps Script</strong>. Borra el código que aparece y pega el código del archivo <code>dental_platino_apps_script.js</code> que descargaste. Guarda con Ctrl+S.</div></div>
+    <div class="step-row"><span class="step-num">3</span><div>Haz clic en <strong>Implementar → Nueva implementación</strong>. Tipo: <em>Aplicación web</em>. Ejecutar como: <em>Yo</em>. Acceso: <em>Cualquier persona</em>. Clic en <strong>Implementar</strong>, copia la URL que aparece y pégala arriba.</div></div>
+  </div>
+  <div class="card" style="margin-bottom:1rem;border:2px solid #4285F4;background:#EAF1FE">
+    <div class="sec" style="color:#1a47a0"><i class="ti ti-calendar-event" style="font-size:14px;vertical-align:-2px;margin-right:5px;color:#4285F4"></i>Sincronización con Google Calendar</div>
+    <div style="font-size:12px;color:#1a47a0;margin-bottom:10px">Cada cita que agendes aparecerá automáticamente en tu Google Calendar. Requiere autorizar el acceso una sola vez.</div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <button class="btn btn-sm" id="btn-gcal-connect" onclick="connectGCal()" style="background:#4285F4;color:#fff;border-color:#4285F4"><i class="ti ti-brand-google"></i>Conectar Google Calendar</button>
+      <button class="btn btn-sm" id="btn-gcal-disconnect" onclick="disconnectGCal()" style="display:none;color:#A32D2D;border-color:#A32D2D"><i class="ti ti-x"></i>Desconectar</button>
+      <span id="gcal-status" style="font-size:12px;color:#1a47a0"></span>
+    </div>
+    <div id="gcal-detail" style="margin-top:10px"></div>
+    <div class="divider" style="margin:0.75rem 0"></div>
+    <div style="font-size:12px;font-weight:600;color:#1a47a0;margin-bottom:6px">Configuración — 2 pasos</div>
+    <div class="step-row" style="color:#1a47a0"><span class="step-num" style="background:#4285F4">1</span><div>Haz clic en <strong>Conectar Google Calendar</strong>. Se abrirá una ventana de Google para que autorices el acceso con tu cuenta. Acepta los permisos.</div></div>
+    <div class="step-row" style="color:#1a47a0"><span class="step-num" style="background:#4285F4">2</span><div>Selecciona el calendario de Google donde quieres que aparezcan las citas (puede ser uno específico para el consultorio). ¡Listo! Todas las citas nuevas se crearán automáticamente.</div></div>
+    <div style="margin-top:8px;padding:8px 10px;background:rgba(66,133,244,0.1);border-radius:var(--radius);font-size:11px;color:#1a47a0">
+      <i class="ti ti-info-circle" style="font-size:12px;vertical-align:-1px;margin-right:3px"></i>
+      <strong>Nota:</strong> Dental Platino usa Google Identity Services (OAuth 2.0). Solo necesitas un <strong>Client ID</strong> gratuito de Google Cloud Console. Ingresa el tuyo abajo o contacta a tu desarrollador para obtenerlo.
+    </div>
+    <div style="margin-top:10px;display:flex;gap:8px;align-items:flex-end">
+      <div class="fg" style="flex:1"><label>Google OAuth Client ID</label>
+        <input type="text" id="cfg-gcal-clientid" placeholder="xxxxx.apps.googleusercontent.com" oninput="LS.set('gcalClientId',this.value)">
+      </div>
+      <button class="btn btn-sm btn-primary" onclick="saveGCalClientId()"><i class="ti ti-check"></i>Guardar</button>
+    </div>
+    <div style="margin-top:6px;font-size:11px;color:#1a47a0">
+      Obtén tu Client ID gratis en <a href="https://console.cloud.google.com" target="_blank" style="color:#4285F4">console.cloud.google.com</a> → APIs → Credenciales → OAuth 2.0. Habilita la API de Google Calendar.
+    </div>
+  </div>
+      <div class="fg" style="margin-bottom:8px"><label>Nombre</label><input type="text" id="cfg-nombre" value="Dental Platino"></div>
+      <div class="fg" style="margin-bottom:8px"><label>Teléfono (WhatsApp)</label><input type="text" id="cfg-wa-num" value="5216561234567"></div>
+      <div class="fg" style="margin-bottom:8px"><label>Dirección</label><input type="text" id="cfg-dir" value="Cd. Juárez, Chih."></div>
+      <div class="fg" style="margin-bottom:8px"><label>Horario</label><input type="text" id="cfg-hor" value="9:00 am – 7:00 pm"></div>
+      <button class="btn btn-primary btn-sm" style="margin-top:6px" onclick="alert('Configuración guardada')">Guardar cambios</button>
+    </div>
+    <div class="card">
+      <div class="sec">Plantilla de mensaje WhatsApp</div>
+      <textarea id="wa-tpl" rows="5" style="font-size:12px"></textarea>
+      <div style="font-size:11px;color:var(--text-secondary);margin-top:5px">Variables: {nombre} {fecha} {hora} {tratamiento}</div>
+      <button class="btn btn-primary btn-sm" style="margin-top:8px" onclick="saveTpl()">Guardar plantilla</button>
+      <div class="divider"></div>
+      <div class="sec">Doctores / responsables</div>
+      <div id="doc-list" style="margin-bottom:8px"></div>
+      <div style="display:flex;gap:6px"><input type="text" id="new-doc" placeholder="Nombre del doctor…" style="font-size:12px"><button class="btn btn-sm btn-primary" onclick="addDoc()"><i class="ti ti-plus"></i></button></div>
+      <div class="divider"></div>
+      <div class="sec">Tipos de tratamiento</div>
+      <div id="trt-list" style="margin-bottom:8px"></div>
+      <div style="display:flex;gap:6px"><input type="text" id="new-trt" placeholder="Agregar tratamiento…" style="font-size:12px"><button class="btn btn-sm btn-primary" onclick="addTrt()"><i class="ti ti-plus"></i></button></div>
+    </div>
+  </div>
+  <div class="card" style="margin-top:1rem">
+    <div class="sec"><i class="ti ti-database" style="font-size:13px;vertical-align:-1px;margin-right:4px"></i>Respaldo local</div>
+    <div style="font-size:12px;color:var(--text-secondary);margin-bottom:10px">Además de Google Sheets, puedes exportar un respaldo .json como copia de seguridad extra.</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn-primary btn-sm" onclick="exportData()"><i class="ti ti-download"></i>Exportar .json</button>
+      <button class="btn btn-sm" onclick="importData()"><i class="ti ti-upload"></i>Importar .json</button>
+      <button class="btn btn-sm" style="color:#A32D2D;border-color:#A32D2D" onclick="resetData()"><i class="ti ti-trash"></i>Borrar todos los datos</button>
+    </div>
+  </div>
+</div>
+
+</div><!-- /content -->
+</div><!-- /main -->
+</div><!-- /app -->
+
+<!-- MODALES -->
+<div class="overlay" id="mcita"><div class="modal">
+  <div class="mh"><span class="mt2"><i class="ti ti-calendar-plus" style="font-size:15px;vertical-align:-2px;margin-right:5px;color:var(--teal)"></i>Nueva cita</span><button class="xb" onclick="cm2('mcita')"><i class="ti ti-x"></i></button></div>
+  <div class="frow"><div class="fg"><label>Paciente</label><select id="c-pac"></select></div><div class="fg"><label>Doctor responsable</label><select id="c-doc"></select></div></div>
+  <div class="frow"><div class="fg"><label>Tratamiento</label><select id="c-trt"></select></div><div class="fg"><label>Fecha</label><input type="date" id="c-fecha"></div></div>
+  <div class="frow"><div class="fg"><label>Hora</label><input type="time" id="c-hora" value="10:00"></div><div class="fg"><label>Duración</label><select id="c-dur"><option>30 min</option><option>45 min</option><option selected>60 min</option><option>90 min</option></select></div></div>
+  <div class="frow"><div class="fg"><label>Estado</label><select id="c-est"><option>pendiente</option><option>confirmada</option><option>primera vez</option></select></div><div class="fg"></div></div>
+  <div class="fg" style="margin-bottom:10px"><label>Notas</label><textarea id="c-notas" rows="2" placeholder="Indicaciones especiales…"></textarea></div>
+  <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn" onclick="cm2('mcita')">Cancelar</button><button class="btn btn-primary" onclick="saveCita()"><i class="ti ti-check"></i>Guardar cita</button></div>
+</div></div>
+
+<div class="overlay" id="mpac"><div class="modal">
+  <div class="mh"><span class="mt2"><i class="ti ti-user-plus" style="font-size:15px;vertical-align:-2px;margin-right:5px;color:var(--teal)"></i>Nuevo paciente</span><button class="xb" onclick="cm2('mpac')"><i class="ti ti-x"></i></button></div>
+  <div class="frow"><div class="fg"><label>Nombre completo</label><input type="text" id="p-nom" placeholder="Nombre completo"></div><div class="fg"><label>Fecha de nacimiento</label><input type="date" id="p-dob"></div></div>
+  <div class="frow"><div class="fg"><label>Teléfono (WhatsApp, sin +)</label><input type="tel" id="p-tel" placeholder="521656xxxxxxx"></div><div class="fg"><label>Email</label><input type="email" id="p-email" placeholder="correo@ejemplo.com"></div></div>
+  <div class="fg" style="margin-bottom:10px"><label>Alergias / notas médicas</label><textarea id="p-notas" rows="2"></textarea></div>
+  <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn" onclick="cm2('mpac')">Cancelar</button><button class="btn btn-primary" onclick="savePac()"><i class="ti ti-check"></i>Registrar</button></div>
+</div></div>
+
+<div class="overlay" id="mpago"><div class="modal">
+  <div class="mh"><span class="mt2"><i class="ti ti-receipt" style="font-size:15px;vertical-align:-2px;margin-right:5px;color:var(--teal)"></i>Registrar pago</span><button class="xb" onclick="cm2('mpago')"><i class="ti ti-x"></i></button></div>
+  <div class="frow"><div class="fg"><label>Paciente</label><select id="pg-pac"></select></div><div class="fg"><label>Tratamiento</label><select id="pg-trt"></select></div></div>
+  <div class="frow"><div class="fg"><label>Monto total ($)</label><input type="number" id="pg-total" placeholder="0" oninput="updPP()"></div><div class="fg"><label>Monto pagado ($)</label><input type="number" id="pg-pago" placeholder="0" oninput="updPP()"></div></div>
+  <div class="fg" style="margin-bottom:8px"><label>Forma de pago</label>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px">
+      <span class="pay-chip sel" onclick="selPay(this,'efectivo')"><i class="ti ti-cash"></i>Efectivo</span>
+      <span class="pay-chip" onclick="selPay(this,'tarjeta')"><i class="ti ti-credit-card"></i>Tarjeta</span>
+      <span class="pay-chip" onclick="selPay(this,'transferencia')"><i class="ti ti-building-bank"></i>Transferencia</span>
+      <span class="pay-chip" onclick="selPay(this,'otro')"><i class="ti ti-dots"></i>Otro</span>
+    </div>
+    <input type="hidden" id="pg-met" value="efectivo">
+  </div>
+  <div class="fg" style="margin-bottom:4px"><label>Fecha de pago</label><input type="date" id="pg-fecha"></div>
+  <div id="pay-preview" style="margin:8px 0;display:none">
+    <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px"><span style="color:var(--text-secondary)">Saldo pendiente:</span><span id="py-saldo" style="font-weight:600"></span></div>
+    <div class="prog-bar"><div class="prog-fill" id="py-prog" style="width:0%"></div></div>
+  </div>
+  <div class="fg" style="margin-bottom:10px"><label>Notas</label><input type="text" id="pg-notas" placeholder="Concepto, abono, etc."></div>
+  <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn" onclick="cm2('mpago')">Cancelar</button><button class="btn btn-primary" onclick="savePago()"><i class="ti ti-check"></i>Registrar pago</button></div>
+</div></div>
+
+<div class="overlay" id="mver"><div class="modal">
+  <div class="mh"><span class="mt2" id="mver-tit">Citas</span><button class="xb" onclick="cm2('mver')"><i class="ti ti-x"></i></button></div>
+  <div id="mver-body"></div>
+</div></div>
+
+<div class="overlay" id="mwa"><div class="modal">
+  <div class="mh"><span class="mt2"><i class="ti ti-brand-whatsapp" style="font-size:15px;vertical-align:-2px;margin-right:5px;color:var(--wa)"></i>Enviar por WhatsApp</span><button class="xb" onclick="cm2('mwa')"><i class="ti ti-x"></i></button></div>
+  <div id="mwa-body"></div>
+</div></div>
+
+<script>
+// ── CONSTANTES ──────────────────────────────────────────────
+const MONTHS=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const DAYS=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+const AVCS=['at','ab','ap','ac'];
+const DEFAULT_TPL='Hola {nombre}, le recordamos su cita en Dental Platino el {fecha} a las {hora} para {tratamiento}. ¿Puede confirmar su asistencia? Responda SI o NO. Gracias.';
+const DEFAULT_TREATMENTS=['Limpieza','Extracción','Ortodoncia','Endodoncia','Blanqueamiento','Corona','Implante','Revisión'];
+const DEFAULT_DOCTORS=['Dr. Responsable'];
+
+let curM=new Date();curM.setDate(1);
+let selPayMethod='efectivo';
+let syncInProgress=false;
+let syncTimer=null;
+
+function todayISO(){return new Date().toISOString().split('T')[0]}
+function tomorrow(){const d=new Date();d.setDate(d.getDate()+1);return d.toISOString().split('T')[0]}
+function addDays(n){const d=new Date();d.setDate(d.getDate()+n);return d.toISOString().split('T')[0]}
+const TODAY=todayISO();
+
+document.getElementById('fecha-hoy').textContent=new Date().toLocaleDateString('es-MX',{weekday:'short',year:'numeric',month:'short',day:'numeric'});
+
+// ── STORAGE LOCAL (caché + fallback) ────────────────────────
+const LS={
+  get(k,def){try{const v=localStorage.getItem('dp_'+k);return v!=null?JSON.parse(v):def}catch(e){return def}},
+  set(k,v){try{localStorage.setItem('dp_'+k,JSON.stringify(v))}catch(e){}}
+};
+
+// ── DATOS ────────────────────────────────────────────────────
+let patients=LS.get('patients',[]);
+let appts=LS.get('appts',[]);
+let pagos=LS.get('pagos',[]);
+let confHist=LS.get('confHist',[]);
+let treatments=LS.get('treatments',DEFAULT_TREATMENTS);
+let doctors=LS.get('doctors',DEFAULT_DOCTORS);
+let waTpl=LS.get('waTpl',DEFAULT_TPL);
+let nextPid=LS.get('nextPid',1);
+let nextApid=LS.get('nextApid',1);
+let nextPayId=LS.get('nextPayId',1);
+let scriptUrl=LS.get('scriptUrl','');
+
+document.getElementById('wa-tpl').value=waTpl;
+if(scriptUrl)document.getElementById('cfg-url').value=scriptUrl;
+
+// ── GOOGLE SHEETS SYNC ───────────────────────────────────────
+function setSyncStatus(state,msg){
+  const dot=document.getElementById('sync-dot');
+  const txt=document.getElementById('sync-txt');
+  dot.className='sync-dot sync-'+state;
+  txt.textContent=msg;
+  txt.style.color=state==='ok'?'var(--teal)':state==='err'?'#E24B4A':'var(--text-secondary)';
+}
+
+async function pushToSheets(){
+  if(!scriptUrl||syncInProgress)return;
+  syncInProgress=true;
+  setSyncStatus('loading','Guardando…');
+  const payload={patients,appts,pagos,confHist,treatments,doctors,waTpl,nextPid,nextApid,nextPayId};
+  try{
+    const res=await fetch(scriptUrl,{method:'POST',body:JSON.stringify({action:'save',key:'all_data',value:payload})});
+    const json=await res.json();
+    if(json.ok){setSyncStatus('ok','Google Sheets ✓');showToast('✓ Datos guardados en Google Sheets','var(--teal)');}
+    else{setSyncStatus('err','Error al guardar');showToast('Error al guardar en Sheets','#A32D2D');}
+  }catch(e){setSyncStatus('err','Sin conexión');showToast('Sin conexión a Google Sheets','#A32D2D');}
+  finally{syncInProgress=false;}
+}
+
+async function pullFromSheets(){
+  if(!scriptUrl)return;
+  setSyncStatus('loading','Cargando…');
+  try{
+    const res=await fetch(scriptUrl+'?action=load');
+    const json=await res.json();
+    if(json.ok&&json.data&&json.data.all_data){
+      const d=json.data.all_data;
+      if(d.patients){patients=d.patients;LS.set('patients',patients)}
+      if(d.appts){appts=d.appts;LS.set('appts',appts)}
+      if(d.pagos){pagos=d.pagos;LS.set('pagos',pagos)}
+      if(d.confHist){confHist=d.confHist;LS.set('confHist',confHist)}
+      if(d.treatments){treatments=d.treatments;LS.set('treatments',treatments)}
+      if(d.doctors){doctors=d.doctors;LS.set('doctors',doctors)}
+      if(d.waTpl){waTpl=d.waTpl;LS.set('waTpl',waTpl);document.getElementById('wa-tpl').value=waTpl}
+      if(d.nextPid)nextPid=d.nextPid;
+      if(d.nextApid)nextApid=d.nextApid;
+      if(d.nextPayId)nextPayId=d.nextPayId;
+      setSyncStatus('ok','Sincronizado ✓');
+      rDB();rPats();
+      showToast('✓ Datos sincronizados desde Google Sheets','var(--teal)');
+    } else if(json.ok&&(!json.data||!json.data.all_data)){
+      setSyncStatus('ok','Conectado — sin datos aún');
+      showSetupNotice();
+    } else {
+      setSyncStatus('err','Error al cargar');
+    }
+  }catch(e){
+    setSyncStatus('err','Sin conexión');
+    if(patients.length===0)showSetupNotice();
+  }
+}
+
+function save(){
+  LS.set('patients',patients);LS.set('appts',appts);LS.set('pagos',pagos);
+  LS.set('confHist',confHist);LS.set('treatments',treatments);LS.set('doctors',doctors);LS.set('waTpl',waTpl);
+  LS.set('nextPid',nextPid);LS.set('nextApid',nextApid);LS.set('nextPayId',nextPayId);
+  clearTimeout(syncTimer);
+  syncTimer=setTimeout(()=>pushToSheets(),800);
+}
+
+function syncNow(){pullFromSheets()}
+
+function checkUrl(){
+  const v=document.getElementById('cfg-url').value.trim();
+  document.getElementById('btn-save-url').disabled=!v.startsWith('https://script.google.com');
+}
+function saveUrl(){
+  scriptUrl=document.getElementById('cfg-url').value.trim();
+  LS.set('scriptUrl',scriptUrl);
+  document.getElementById('url-status').innerHTML=`<span style="color:var(--teal)"><i class="ti ti-circle-check" style="font-size:12px;vertical-align:-1px;margin-right:3px"></i>URL guardada. Conectando…</span>`;
+  pullFromSheets();
+}
+
+function showSetupNotice(){
+  const el=document.getElementById('setup-notice');
+  if(!el)return;
+  if(!scriptUrl){
+    el.innerHTML=`<div class="setup-banner"><strong><i class="ti ti-info-circle" style="font-size:14px;vertical-align:-2px;margin-right:5px"></i>Configura Google Sheets para sincronización en la nube</strong>Ve a <strong>Configuración</strong> y sigue los 3 pasos para conectar tu Google Sheets. Mientras tanto puedes usar el sistema normalmente. <button class="btn btn-sm btn-primary" style="margin-left:8px" onclick="sp('config',document.querySelector('.nav-item:last-child'))"><i class="ti ti-settings"></i>Ir a configuración</button></div>`;
+  } else {
+    el.innerHTML='';
+  }
+}
+
+// ── TOAST ────────────────────────────────────────────────────
+function showToast(msg,color='var(--teal)'){
+  const t=document.getElementById('toast');
+  t.innerHTML=`<i class="ti ti-circle-check" style="color:${color};font-size:16px"></i>${msg}`;
+  t.classList.add('show');
+  clearTimeout(t._t);
+  t._t=setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+// ── HELPERS ──────────────────────────────────────────────────
+function gp(id){return patients.find(p=>p.id===id)||{name:'?',av:'at',phone:'',notes:''}}
+function ini(n){return n.split(' ').slice(0,2).map(w=>w[0]).join('')}
+function sb(s){const m={confirmada:'bg',pendiente:'ba','primera vez':'bb',cancelada:'br'};return`<span class="badge ${m[s]||'bgr'}">${s}</span>`}
+function ec(s){const m={confirmada:'var(--teal-mid)',pendiente:'var(--amber-mid)','primera vez':'var(--blue-mid)',cancelada:'var(--red-mid)'};return m[s]||'var(--amber-mid)'}
+function fmt(n){return'$'+Number(n).toLocaleString('es-MX')}
+function payBadge(s){const m={pagado:'bg',parcial:'ba',pendiente:'br'};return`<span class="badge ${m[s]||'bgr'}">${s}</span>`}
+
+// ── NAVEGACIÓN ───────────────────────────────────────────────
+function sp(id,el){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  if(el)el.classList.add('active');
+  const titles={dashboard:'Panel principal',agenda:'Agenda',pacientes:'Pacientes',confirmaciones:'Confirmaciones WhatsApp',pagos:'Registro de pagos',expediente:'Expedientes',config:'Configuración'};
+  document.getElementById('ptitle').textContent=titles[id]||id;
+  if(id==='agenda')rCal();
+  if(id==='confirmaciones')rConf();
+  if(id==='pagos')rPagos();
+  if(id==='expediente')rExp();
+  if(id==='config')rConfig();
+}
+function om(id){document.getElementById(id).classList.add('open');if(id==='mcita'||id==='mpago')popSel()}
+function cm2(id){document.getElementById(id).classList.remove('open')}
+document.querySelectorAll('.overlay').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open')}));
+
+function popSel(){
+  ['c-pac','pg-pac'].forEach(sid=>{const s=document.getElementById(sid);if(s){s.innerHTML='<option value="">Seleccionar…</option>'+patients.map(p=>`<option value="${p.id}">${p.name}</option>`).join('')}});
+  ['c-trt','pg-trt'].forEach(sid=>{const s=document.getElementById(sid);if(s){s.innerHTML='<option value="">Seleccionar…</option>'+treatments.map(t=>`<option>${t}</option>`).join('')}});
+  const cd=document.getElementById('c-doc');if(cd){cd.innerHTML='<option value="">Seleccionar…</option>'+doctors.map(d=>`<option>${d}</option>`).join('')};
+  const d=document.getElementById('pg-fecha');if(d)d.value=TODAY;
+  const cf=document.getElementById('c-fecha');if(cf)cf.value=TODAY;
+}
+
+// ── CRUD ─────────────────────────────────────────────────────
+function saveCita(){
+  const pid=parseInt(document.getElementById('c-pac').value);
+  if(!pid||!document.getElementById('c-trt').value||!document.getElementById('c-fecha').value){alert('Completa los campos requeridos');return}
+  const newAppt={id:nextApid++,pid,trt:document.getElementById('c-trt').value,doctor:document.getElementById('c-doc').value,date:document.getElementById('c-fecha').value,time:document.getElementById('c-hora').value,dur:document.getElementById('c-dur').value,status:document.getElementById('c-est').value,notes:document.getElementById('c-notas').value};
+  appts.push(newAppt);
+  save();cm2('mcita');rDB();rCal();rConf();
+  document.getElementById('c-notas').value='';
+  showToast('Cita agendada');
+  addToGCal(newAppt);
+}
+
+function savePac(){
+  const n=document.getElementById('p-nom').value.trim();
+  if(!n){alert('Ingresa el nombre del paciente');return}
+  patients.push({id:nextPid++,name:n,phone:document.getElementById('p-tel').value.replace(/\D/g,''),dob:document.getElementById('p-dob').value,email:document.getElementById('p-email').value,notes:document.getElementById('p-notas').value,av:AVCS[(nextPid-1)%4],lastVisit:'—',status:'nuevo'});
+  save();cm2('mpac');rPats();rExp();
+  ['p-nom','p-tel','p-email','p-notas'].forEach(id=>{document.getElementById(id).value=''});
+  showToast('Paciente registrado');
+}
+
+function selPay(el,val){document.querySelectorAll('.pay-chip').forEach(c=>c.classList.remove('sel'));el.classList.add('sel');selPayMethod=val;document.getElementById('pg-met').value=val}
+
+function updPP(){
+  const t=parseFloat(document.getElementById('pg-total').value)||0;
+  const p=parseFloat(document.getElementById('pg-pago').value)||0;
+  const pv=document.getElementById('pay-preview');
+  if(t>0){pv.style.display='block';document.getElementById('py-saldo').textContent=fmt(Math.max(0,t-p));document.getElementById('py-prog').style.width=Math.min(100,Math.round(p/t*100))+'%'}
+  else pv.style.display='none';
+}
+
+function savePago(){
+  const pid=parseInt(document.getElementById('pg-pac').value);
+  if(!pid||!document.getElementById('pg-trt').value){alert('Selecciona paciente y tratamiento');return}
+  const total=parseFloat(document.getElementById('pg-total').value)||0;
+  const pagado=parseFloat(document.getElementById('pg-pago').value)||0;
+  const st=pagado>=total&&total>0?'pagado':pagado>0?'parcial':'pendiente';
+  pagos.push({id:nextPayId++,pid,trt:document.getElementById('pg-trt').value,fecha:document.getElementById('pg-fecha').value||TODAY,total,pagado,metodo:document.getElementById('pg-met').value,notas:document.getElementById('pg-notas').value,status:st});
+  save();cm2('mpago');rPagos();rDB();
+  ['pg-total','pg-pago','pg-notas'].forEach(id=>{document.getElementById(id).value=''});
+  document.getElementById('pay-preview').style.display='none';
+  showToast('Pago registrado');
+}
+
+function logConf(apid){
+  const a=appts.find(x=>x.id===apid);if(!a)return;
+  confHist.unshift({pid:a.pid,apptDate:a.date,at:new Date().toLocaleString('es-MX'),method:'WhatsApp',status:'enviado'});
+  save();
+}
+function confAppt(apid){
+  const a=appts.find(x=>x.id===apid);
+  if(a){a.status='confirmada';confHist.unshift({pid:a.pid,apptDate:a.date,at:new Date().toLocaleString('es-MX'),method:'Manual',status:'confirmada'});}
+  save();rDB();rConf();showToast('Cita confirmada');
+}
+
+// ── RENDER DASHBOARD ─────────────────────────────────────────
+function rDB(){
+  const ta=appts.filter(a=>a.date===TODAY);
+  document.getElementById('d-citas').textContent=ta.length;
+  const tom=tomorrow();
+  document.getElementById('d-pend').textContent=appts.filter(a=>a.status==='pendiente'&&(a.date===TODAY||a.date===tom)).length;
+  const todayPay=pagos.filter(p=>p.fecha===TODAY);
+  document.getElementById('d-ing').textContent=fmt(todayPay.reduce((s,p)=>s+p.pagado,0));
+  const mo=TODAY.substring(0,7);
+  document.getElementById('d-mes').textContent=fmt(pagos.filter(p=>p.fecha&&p.fecha.startsWith(mo)).reduce((s,p)=>s+p.pagado,0));
+  const tb=document.getElementById('t-today');
+  tb.innerHTML=ta.length?ta.map(a=>{const p=gp(a.pid);return`<tr><td><span class="av ${p.av}">${ini(p.name)}</span>${p.name.split(' ')[0]}</td><td>${a.time}</td><td>${a.trt}</td><td style="color:var(--text-secondary);font-size:11px">${a.doctor||'—'}</td><td>${sb(a.status)}</td></tr>`}).join(''):`<tr><td colspan="5" style="text-align:center;color:var(--text-secondary);padding:1rem">Sin citas hoy</td></tr>`;
+  const pend=appts.filter(a=>a.status==='pendiente'&&(a.date===TODAY||a.date===tom));
+  document.getElementById('d-pending').innerHTML=pend.length?pend.map(a=>{const p=gp(a.pid);return`<div style="display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border-light);font-size:12px"><span><span class="av ${p.av}" style="width:22px;height:22px;font-size:9px">${ini(p.name)}</span>${p.name.split(' ')[0]} · ${a.time}</span><button class="btn btn-green btn-sm" onclick="openWA(${a.id})"><i class="ti ti-brand-whatsapp"></i></button></div>`}).join(''):`<p style="font-size:12px;color:var(--text-secondary)">Sin pendientes ✓</p>`;
+  const rp=pagos.slice(-3).reverse();
+  document.getElementById('d-recent-pay').innerHTML=rp.length?rp.map(pg=>{const p=gp(pg.pid);return`<div style="display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border-light);font-size:12px"><span><span class="av ${p.av}" style="width:22px;height:22px;font-size:9px">${ini(p.name)}</span>${p.name.split(' ')[0]} · ${pg.trt}</span><span style="font-weight:600;color:var(--teal)">${fmt(pg.pagado)}</span></div>`}).join(''):`<p style="font-size:12px;color:var(--text-secondary)">Sin pagos registrados</p>`;
+}
+
+// ── PACIENTES ────────────────────────────────────────────────
+function rPats(){
+  const q=(document.getElementById('srch').value||'').toLowerCase();
+  const list=patients.filter(p=>!q||p.name.toLowerCase().includes(q)||(p.phone||'').includes(q));
+  const saldo=pid=>pagos.filter(p=>p.pid===pid).reduce((s,p)=>s+(p.total-p.pagado),0);
+  document.getElementById('t-pats').innerHTML=list.length?list.map(p=>{const sal=saldo(p.id);return`<tr><td><span class="av ${p.av}">${ini(p.name)}</span>${p.name}</td><td>${p.phone?'+'+p.phone:'-'}</td><td>${p.lastVisit||'—'}</td><td style="color:${sal>0?'#A32D2D':'var(--teal)'};font-weight:500">${sal>0?fmt(sal)+' pend.':'Al día'}</td><td><button class="btn btn-sm" onclick="viewExp(${p.id})"><i class="ti ti-file-medical"></i></button></td></tr>`}).join(''):`<tr><td colspan="5" style="text-align:center;color:var(--text-secondary);padding:1rem">Sin pacientes aún</td></tr>`;
+}
+
+// ── CALENDARIO ───────────────────────────────────────────────
+function rCal(){
+  document.getElementById('cal-lbl').textContent=MONTHS[curM.getMonth()]+' '+curM.getFullYear();
+  document.getElementById('cal-h').innerHTML=DAYS.map(d=>`<div style="text-align:center;font-size:10px;font-weight:600;color:var(--text-secondary);padding:5px 0">${d}</div>`).join('');
+  const first=new Date(curM.getFullYear(),curM.getMonth(),1);
+  const last=new Date(curM.getFullYear(),curM.getMonth()+1,0);
+  const sd=first.getDay();const cells=[];
+  for(let i=0;i<sd;i++){const d=new Date(first);d.setDate(d.getDate()-(sd-i));cells.push({d,o:true})}
+  for(let i=1;i<=last.getDate();i++)cells.push({d:new Date(curM.getFullYear(),curM.getMonth(),i),o:false});
+  while(cells.length%7)cells.push({d:new Date(last.getTime()+(cells.length-last.getDate()-sd+1)*86400000),o:true});
+  document.getElementById('cal-b').innerHTML=cells.map(c=>{
+    const iso=c.d.toISOString().split('T')[0];const isT=iso===TODAY;
+    const da=appts.filter(a=>a.date===iso).slice(0,2);
+    return`<div style="min-height:58px;border-radius:6px;border:1px solid var(--border-light);background:${isT?'var(--teal-light)':'var(--bg-primary)'};padding:4px;cursor:pointer;opacity:${c.o?0.3:1}" onmouseover="this.style.borderColor='var(--teal)'" onmouseout="this.style.borderColor='var(--border-light)'" onclick="openDay('${iso}')"><div style="font-size:10px;font-weight:600;color:${isT?'var(--teal-dark)':'var(--text-secondary)'};margin-bottom:2px">${c.d.getDate()}</div>${da.map(a=>{const p=gp(a.pid);return`<div style="font-size:9px;border-radius:2px;padding:1px 3px;margin-bottom:1px;background:${ec(a.status)};overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--teal-dark)">${a.time} ${p.name.split(' ')[0]}</div>`}).join('')}</div>`;
+  }).join('');
+}
+function cm(d){curM.setMonth(curM.getMonth()+d);rCal()}
+function openDay(iso){
+  const da=appts.filter(a=>a.date===iso);
+  document.getElementById('mver-tit').textContent='Citas del '+iso;
+  document.getElementById('mver-body').innerHTML=da.length?`<table style="table-layout:fixed"><thead><tr><th style="width:26%">Paciente</th><th style="width:13%">Hora</th><th style="width:20%">Tratamiento</th><th style="width:20%">Doctor</th><th style="width:13%">Estado</th><th style="width:8%"></th></tr></thead><tbody>${da.map(a=>{const p=gp(a.pid);return`<tr><td><span class="av ${p.av}" style="width:22px;height:22px;font-size:9px">${ini(p.name)}</span>${p.name.split(' ')[0]}</td><td>${a.time}</td><td>${a.trt}</td><td style="color:var(--text-secondary);font-size:11px">${a.doctor||'—'}</td><td>${sb(a.status)}</td><td>${a.status==='pendiente'?`<button class="btn btn-sm" style="color:var(--wa);border-color:var(--wa)" onclick="openWA(${a.id})"><i class="ti ti-brand-whatsapp"></i></button>`:''}</td></tr>`}).join('')}</tbody></table>`:`<div style="text-align:center;padding:1.5rem;color:var(--text-secondary)">Sin citas · <button class="btn btn-primary btn-sm" style="margin-left:8px" onclick="cm2('mver');om('mcita')">Agendar</button></div>`;
+  om('mver');
+}
+
+// ── WHATSAPP ─────────────────────────────────────────────────
+function buildMsg(a,p){return waTpl.replace(/{nombre}/g,p.name.split(' ')[0]).replace(/{fecha}/g,a.date).replace(/{hora}/g,a.time).replace(/{tratamiento}/g,a.trt)}
+function openWA(apid){
+  const a=appts.find(x=>x.id===apid);if(!a)return;
+  const p=gp(a.pid);const msg=buildMsg(a,p);
+  const waUrl=`https://wa.me/${p.phone}?text=${encodeURIComponent(msg)}`;
+  document.getElementById('mwa-body').innerHTML=`
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px"><span class="av ${p.av}" style="width:36px;height:36px;font-size:13px">${ini(p.name)}</span><div><div style="font-size:13px;font-weight:600">${p.name}</div><div style="font-size:11px;color:var(--text-secondary)">+${p.phone} · ${a.date} ${a.time} · ${a.trt}</div></div></div>
+    <div style="font-size:11px;color:var(--text-secondary);margin-bottom:4px">Vista previa:</div>
+    <div class="wa-preview">${msg}</div>
+    <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+      <a href="${waUrl}" target="_blank" class="btn btn-green" onclick="logConf(${apid})"><i class="ti ti-brand-whatsapp"></i>Abrir en WhatsApp</a>
+      <button class="btn btn-sm" onclick="confAppt(${apid});cm2('mwa')"><i class="ti ti-check"></i>Marcar confirmado</button>
+      <button class="btn btn-sm" onclick="copyMsg('${encodeURIComponent(msg)}')"><i class="ti ti-copy"></i>Copiar</button>
+    </div>`;
+  om('mwa');
+}
+function copyMsg(enc){try{navigator.clipboard.writeText(decodeURIComponent(enc)).then(()=>showToast('Mensaje copiado'));}catch(e){}}
+
+// ── CONFIRMACIONES ───────────────────────────────────────────
+function rConf(){
+  const tom=tomorrow();
+  const pend=appts.filter(a=>a.status==='pendiente'&&a.date>=TODAY&&a.date<=tom);
+  document.getElementById('wa-list').innerHTML=pend.length?pend.map(a=>{const p=gp(a.pid);const msg=buildMsg(a,p);return`<div class="card" style="margin-bottom:8px"><div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px"><div style="display:flex;align-items:center;gap:8px"><span class="av ${p.av}" style="width:34px;height:34px;font-size:12px">${ini(p.name)}</span><div><div style="font-size:13px;font-weight:600">${p.name}</div><div style="font-size:11px;color:var(--text-secondary)">${a.trt} · ${a.date} · ${a.time}</div></div></div><div style="display:flex;gap:5px"><a href="tel:+${p.phone}" class="btn btn-sm"><i class="ti ti-phone"></i></a><button class="btn btn-green btn-sm" onclick="openWA(${a.id})"><i class="ti ti-brand-whatsapp"></i>WhatsApp</button><button class="btn btn-sm" style="color:var(--teal);border-color:var(--teal)" onclick="confAppt(${a.id})"><i class="ti ti-check"></i></button></div></div>${p.notes?`<div style="margin-top:5px;font-size:11px;padding:3px 8px;background:var(--amber-light);border-radius:4px;color:var(--amber-dark)"><i class="ti ti-alert-triangle" style="font-size:11px;vertical-align:-1px;margin-right:3px"></i>${p.notes}</div>`:''}<div class="wa-preview" style="margin-top:8px">${msg}</div></div>`}).join(''):`<div class="card" style="text-align:center;padding:1.5rem;color:var(--text-secondary)"><i class="ti ti-circle-check" style="font-size:28px;display:block;margin-bottom:6px;color:var(--teal)"></i>Todas las citas están confirmadas</div>`;
+  document.getElementById('t-confhist').innerHTML=confHist.length?confHist.slice(0,20).map(h=>{const p=gp(h.pid);return`<tr><td><span class="av ${p.av}" style="width:22px;height:22px;font-size:9px">${ini(p.name)}</span>${p.name}</td><td>${h.apptDate}</td><td style="color:var(--text-secondary)">${h.at}</td><td>${h.method==='WhatsApp'?`<span class="wa-chip"><i class="ti ti-brand-whatsapp"></i>WhatsApp</span>`:h.method}</td><td>${sb(h.status)}</td></tr>`}).join(''):`<tr><td colspan="5" style="text-align:center;color:var(--text-secondary);padding:1rem">Sin registros</td></tr>`;
+}
+
+// ── PAGOS ────────────────────────────────────────────────────
+function rPagos(){
+  const q=(document.getElementById('srch-pay').value||'').toLowerCase();
+  const fil=document.getElementById('fil-pay').value;
+  const list=pagos.filter(pg=>{const p=gp(pg.pid);return(!q||p.name.toLowerCase().includes(q))&&(!fil||pg.status===fil)});
+  document.getElementById('pay-total').textContent=fmt(pagos.reduce((s,p)=>s+p.pagado,0));
+  document.getElementById('pay-pend').textContent=fmt(pagos.reduce((s,p)=>s+(p.total-p.pagado),0));
+  document.getElementById('pay-efe').textContent=fmt(pagos.filter(p=>p.metodo==='efectivo').reduce((s,p)=>s+p.pagado,0));
+  document.getElementById('pay-tar').textContent=fmt(pagos.filter(p=>p.metodo!=='efectivo').reduce((s,p)=>s+p.pagado,0));
+  document.getElementById('t-pagos').innerHTML=list.length?list.map(pg=>{const p=gp(pg.pid);const pct=pg.total>0?Math.round(pg.pagado/pg.total*100):0;return`<tr><td><span class="av ${p.av}" style="width:22px;height:22px;font-size:9px">${ini(p.name)}</span>${p.name.split(' ')[0]}</td><td>${pg.fecha}</td><td>${pg.trt}</td><td style="font-weight:600">${fmt(pg.total)}</td><td><div style="display:flex;align-items:center;gap:4px">${fmt(pg.pagado)}<span style="font-size:9px;color:var(--text-secondary)">${pct}%</span></div><div class="prog-bar" style="margin-top:2px;height:3px"><div class="prog-fill" style="width:${pct}%"></div></div></td><td>${payBadge(pg.status)}</td></tr>`}).join(''):`<tr><td colspan="6" style="text-align:center;color:var(--text-secondary);padding:1rem">Sin resultados</td></tr>`;
+}
+
+// ── EXPEDIENTES ──────────────────────────────────────────────
+function rExp(){
+  const q=(document.getElementById('srch-exp').value||'').toLowerCase();
+  const list=patients.filter(p=>!q||p.name.toLowerCase().includes(q));
+  document.getElementById('exp-list').innerHTML=list.length?list.map(p=>`<div onclick="viewExp(${p.id})" style="display:flex;align-items:center;gap:7px;padding:8px;border-radius:var(--radius);cursor:pointer;border:1px solid var(--border-light)" onmouseover="this.style.background='var(--bg-secondary)'" onmouseout="this.style.background='transparent'"><span class="av ${p.av}">${ini(p.name)}</span><div><div style="font-size:12px;font-weight:600">${p.name}</div><div style="font-size:10px;color:var(--text-secondary)">${p.phone?'+'+p.phone:'-'}</div></div></div>`).join(''):`<p style="font-size:12px;color:var(--text-secondary);padding:1rem 0">Sin pacientes registrados</p>`;
+}
+function viewExp(pid){
+  sp('expediente',document.querySelector('.nav-item:nth-child(6)'));
+  const p=gp(pid);const pa=appts.filter(a=>a.pid===pid).sort((a,b)=>b.date.localeCompare(a.date));
+  const pp=pagos.filter(pg=>pg.pid===pid);
+  const totPag=pp.reduce((s,x)=>s+x.pagado,0);const totPen=pp.reduce((s,x)=>s+(x.total-x.pagado),0);
+  document.getElementById('exp-det').innerHTML=`
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:0.75rem"><span class="av ${p.av}" style="width:42px;height:42px;font-size:15px">${ini(p.name)}</span><div><div style="font-size:14px;font-weight:600">${p.name}</div><div style="font-size:11px;color:var(--text-secondary)">${p.phone?'+'+p.phone:'-'} · ${p.email||'—'}</div></div></div>
+    ${p.notes?`<div style="padding:6px 8px;background:var(--amber-light);border-radius:6px;font-size:11px;color:var(--amber-dark);margin-bottom:8px"><i class="ti ti-alert-triangle" style="font-size:11px;vertical-align:-1px;margin-right:3px"></i><strong>Notas médicas:</strong> ${p.notes}</div>`:''}
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:8px">
+      <div style="padding:6px 8px;background:var(--bg-secondary);border-radius:6px;font-size:11px"><span style="color:var(--text-secondary)">Total pagado</span><br><span style="font-weight:700;color:var(--teal)">${fmt(totPag)}</span></div>
+      <div style="padding:6px 8px;background:var(--bg-secondary);border-radius:6px;font-size:11px"><span style="color:var(--text-secondary)">Saldo pendiente</span><br><span style="font-weight:700;color:${totPen>0?'#A32D2D':'var(--teal)'}">${fmt(totPen)}</span></div>
+    </div>
+    <div style="font-size:12px;font-weight:600;margin-bottom:5px">Historial de citas</div>
+    ${pa.length?`<table style="table-layout:fixed"><thead><tr><th style="width:22%">Fecha</th><th style="width:22%">Tratamiento</th><th style="width:24%">Doctor</th><th style="width:16%">Estado</th><th style="width:16%">Pago</th></tr></thead><tbody>${pa.map(a=>{const pg=pagos.find(x=>x.pid===pid&&x.trt===a.trt&&x.fecha===a.date);return`<tr><td>${a.date}</td><td>${a.trt}</td><td style="color:var(--text-secondary);font-size:11px">${a.doctor||'—'}</td><td>${sb(a.status)}</td><td>${pg?payBadge(pg.status):'—'}</td></tr>`}).join('')}</tbody></table>`:`<p style="font-size:12px;color:var(--text-secondary)">Sin citas registradas</p>`}`;
+}
+
+// ── CONFIGURACIÓN ────────────────────────────────────────────
+function rConfig(){
+  document.getElementById('doc-list').innerHTML=doctors.map((d,i)=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:5px 8px;border-radius:4px;font-size:12px;margin-bottom:3px;background:var(--bg-secondary)"><span><i class="ti ti-stethoscope" style="font-size:12px;vertical-align:-1px;margin-right:5px;color:var(--teal)"></i>${d}</span><button onclick="delDoc(${i})" style="background:none;border:none;cursor:pointer;color:var(--text-secondary)"><i class="ti ti-x"></i></button></div>`).join('');
+  document.getElementById('trt-list').innerHTML=treatments.map((t,i)=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:5px 8px;border-radius:4px;font-size:12px;margin-bottom:3px;background:var(--bg-secondary)"><span>${t}</span><button onclick="delTrt(${i})" style="background:none;border:none;cursor:pointer;color:var(--text-secondary)"><i class="ti ti-x"></i></button></div>`).join('');
+  if(scriptUrl)document.getElementById('cfg-url').value=scriptUrl;
+}
+function addDoc(){const v=document.getElementById('new-doc').value.trim();if(v&&!doctors.includes(v)){doctors.push(v);document.getElementById('new-doc').value='';save();rConfig();showToast('Doctor agregado')}}
+function delDoc(i){if(doctors.length<=1){alert('Debe haber al menos un doctor');return}doctors.splice(i,1);save();rConfig()}
+function addTrt(){const v=document.getElementById('new-trt').value.trim();if(v&&!treatments.includes(v)){treatments.push(v);document.getElementById('new-trt').value='';save();rConfig()}}
+function delTrt(i){treatments.splice(i,1);save();rConfig()}
+function saveTpl(){waTpl=document.getElementById('wa-tpl').value;save();showToast('Plantilla guardada')}
+
+// ── BACKUP LOCAL ─────────────────────────────────────────────
+function exportData(){
+  const data={patients,appts,pagos,confHist,treatments,doctors,waTpl,nextPid,nextApid,nextPayId,exportedAt:new Date().toISOString()};
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='dental_platino_backup_'+TODAY+'.json';a.click();
+}
+function importData(){
+  const inp=document.createElement('input');inp.type='file';inp.accept='.json';
+  inp.onchange=e=>{
+    const f=e.target.files[0];if(!f)return;
+    const r=new FileReader();
+    r.onload=ev=>{
+      try{
+        const d=JSON.parse(ev.target.result);
+        if(!d.patients)throw new Error('Formato inválido');
+        if(!confirm('¿Importar datos? Reemplazará los datos actuales.'))return;
+        patients=d.patients;appts=d.appts;pagos=d.pagos||[];confHist=d.confHist||[];
+        treatments=d.treatments||DEFAULT_TREATMENTS;doctors=d.doctors||DEFAULT_DOCTORS;waTpl=d.waTpl||DEFAULT_TPL;
+        nextPid=d.nextPid||patients.length+1;nextApid=d.nextApid||appts.length+1;nextPayId=d.nextPayId||pagos.length+1;
+        document.getElementById('wa-tpl').value=waTpl;
+        save();rDB();rPats();showToast('Datos importados correctamente');
+      }catch(err){alert('Error al importar: '+err.message)}
+    };r.readAsText(f);
+  };inp.click();
+}
+function resetData(){
+  if(!confirm('¿Borrar TODOS los datos? No se puede deshacer.'))return;
+  ['patients','appts','pagos','confHist','treatments','waTpl','nextPid','nextApid','nextPayId'].forEach(k=>localStorage.removeItem('dp_'+k));
+  location.reload();
+}
+
+// ── GOOGLE CALENDAR ──────────────────────────────────────────
+let gcalToken=null;
+let gcalCalendarId=LS.get('gcalCalendarId','primary');
+let gcalClientId=LS.get('gcalClientId','');
+let gcalConnected=LS.get('gcalConnected',false);
+
+function saveGCalClientId(){
+  gcalClientId=document.getElementById('cfg-gcal-clientid').value.trim();
+  LS.set('gcalClientId',gcalClientId);
+  showToast('Client ID guardado');
+}
+
+function connectGCal(){
+  if(!gcalClientId){
+    alert('Primero ingresa tu Google OAuth Client ID en el campo de abajo.');
+    return;
+  }
+  const scope='https://www.googleapis.com/auth/calendar.events';
+  const redirectUri=window.location.href.split('?')[0];
+  const authUrl=`https://accounts.google.com/o/oauth2/v2/auth?client_id=${encodeURIComponent(gcalClientId)}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=token&scope=${encodeURIComponent(scope)}&prompt=consent`;
+  const popup=window.open(authUrl,'gcal_auth','width=520,height=620,scrollbars=yes');
+  const check=setInterval(()=>{
+    try{
+      if(popup.closed){clearInterval(check);return}
+      const hash=popup.location.hash;
+      if(hash&&hash.includes('access_token')){
+        clearInterval(check);popup.close();
+        const params=new URLSearchParams(hash.substring(1));
+        gcalToken=params.get('access_token');
+        const exp=parseInt(params.get('expires_in')||3600);
+        LS.set('gcalConnected',true);
+        gcalConnected=true;
+        showToast('✓ Google Calendar conectado','#4285F4');
+        updateGCalUI();
+        loadGCalCalendars();
+      }
+    }catch(e){}
+  },500);
+}
+
+function disconnectGCal(){
+  gcalToken=null;gcalConnected=false;
+  LS.set('gcalConnected',false);
+  updateGCalUI();
+  showToast('Google Calendar desconectado');
+}
+
+function updateGCalUI(){
+  const btnCon=document.getElementById('btn-gcal-connect');
+  const btnDis=document.getElementById('btn-gcal-disconnect');
+  const stat=document.getElementById('gcal-status');
+  if(!btnCon)return;
+  if(gcalConnected&&gcalToken){
+    btnCon.style.display='none';
+    btnDis.style.display='inline-flex';
+    stat.innerHTML=`<span style="color:#27500A"><i class="ti ti-circle-check" style="font-size:13px;vertical-align:-2px;margin-right:3px"></i>Conectado</span>`;
+  } else {
+    btnCon.style.display='inline-flex';
+    btnDis.style.display='none';
+    stat.innerHTML=`<span style="color:#6b6b6b">No conectado</span>`;
+  }
+}
+
+async function loadGCalCalendars(){
+  if(!gcalToken)return;
+  try{
+    const res=await fetch('https://www.googleapis.com/calendar/v3/users/me/calendarList',{headers:{Authorization:'Bearer '+gcalToken}});
+    const data=await res.json();
+    if(data.items){
+      const det=document.getElementById('gcal-detail');
+      if(!det)return;
+      det.innerHTML=`<div style="margin-top:4px"><label style="font-size:11px;font-weight:600;color:#1a47a0">Calendario destino</label>
+        <select id="gcal-cal-sel" onchange="gcalCalendarId=this.value;LS.set('gcalCalendarId',this.value)" style="margin-top:4px;font-size:12px;border-color:#4285F4">
+          ${data.items.map(c=>`<option value="${c.id}" ${c.id===gcalCalendarId?'selected':''}>${c.summary}</option>`).join('')}
+        </select>
+        <div style="font-size:11px;color:#1a47a0;margin-top:4px"><i class="ti ti-circle-check" style="font-size:11px;vertical-align:-1px;margin-right:3px"></i>Las nuevas citas se agregarán a este calendario automáticamente.</div>
+      </div>`;
+    }
+  }catch(e){console.warn('Error cargando calendarios:',e)}
+}
+
+async function addToGCal(appt){
+  if(!gcalToken||!gcalConnected)return;
+  const pat=gp(appt.pid);
+  const dateStr=appt.date;
+  const timeStr=appt.time||'09:00';
+  const durMin=parseInt((appt.dur||'60 min').replace(' min',''))||60;
+  const start=new Date(`${dateStr}T${timeStr}:00`);
+  const end=new Date(start.getTime()+durMin*60000);
+  const toISO=d=>d.toISOString();
+  const event={
+    summary:`🦷 ${pat.name} — ${appt.trt}`,
+    description:`Paciente: ${pat.name}\nTratamiento: ${appt.trt}\nDoctor: ${appt.doctor||'—'}\nTeléfono: ${pat.phone?'+'+pat.phone:'—'}\nNotas: ${appt.notes||'—'}\n\nAgendado desde Dental Platino`,
+    start:{dateTime:toISO(start),timeZone:'America/Chihuahua'},
+    end:{dateTime:toISO(end),timeZone:'America/Chihuahua'},
+    colorId:'7',
+    reminders:{useDefault:false,overrides:[{method:'popup',minutes:60},{method:'popup',minutes:15}]}
+  };
+  try{
+    const res=await fetch(`https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(gcalCalendarId)}/events`,{
+      method:'POST',
+      headers:{Authorization:'Bearer '+gcalToken,'Content-Type':'application/json'},
+      body:JSON.stringify(event)
+    });
+    const data=await res.json();
+    if(data.id){showToast('✓ Cita agregada a Google Calendar','#4285F4');}
+    else if(data.error&&data.error.code===401){
+      gcalToken=null;gcalConnected=false;LS.set('gcalConnected',false);
+      showToast('Sesión de Google expirada. Reconecta en Configuración','#A32D2D');
+      updateGCalUI();
+    }
+  }catch(e){console.warn('Error Google Calendar:',e)}
+}
+
+// Inicializar UI de GCal
+if(gcalClientId){const el=document.getElementById('cfg-gcal-clientid');if(el)el.value=gcalClientId}
+updateGCalUI();
+
+// ── ARRANQUE ─────────────────────────────────────────────────
+checkUrl();
+if(scriptUrl){
+  pullFromSheets();
+  setInterval(()=>pullFromSheets(),60000);
+} else {
+  setSyncStatus('err','No configurado');
+  showSetupNotice();
+}
+rDB();rPats();
+</script>
+</body>
+</html>
